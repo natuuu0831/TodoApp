@@ -41,7 +41,7 @@
               v-model="list.text"
             />
             <div class="rest_date">
-              残り{{ list.date <= 0 ? 0 : list.date }}日
+              残り{{ (list.date <= 0) ? 0 : list.date }}日
             </div>
             <select
               name=""
@@ -87,18 +87,20 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 5px;
+        box-shadow: 0 2px 3px 0px rgba(0,0,0,0.1);
       }
 
       #add_form input {
         font-size: 18px;
+      }
+      input:focus{
+        outline: none;
       }
       .card {
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
         border-radius: 5px;
         width: 600px;
         box-sizing: border-box;
-        padding: 20px;
         background: #fff;
       }
       .btn_add{
@@ -117,22 +119,30 @@
         width: 70%;
         padding: 5px;
         border: 1px solid #777;
+        border: none;
       }
-
+      ul{
+        padding: 0 20px 20px;
+        overflow: hidden;
+      }
       li {
-        border: 1px solid #d1d1d1;
-        padding: 5px 5px 5px 15px;
-        margin-bottom: 5px;
+        padding: 10px 5px 10px 15px;
+        margin-bottom: 10px;
         border-radius: 5px;
         display: flex;
         justify-content: space-around;
+        box-shadow: 0 1px 6px 0px rgba(0,0,0,0.2);
       }
 
       li.comp {
         background: rgb(238, 255, 236);
       }
+      li.comp span{
+        text-decoration: line-through;
+      }
       li.over {
         background: rgb(255, 226, 218);
+        color: red;
       }
 
       li span {
