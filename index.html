@@ -14,38 +14,44 @@
     <div class="card">
       <form id="add_form">
         <input type="text" v-model="input" class="add_todo" placeholder="タスクを入力してください" />
-        <v-date-picker :mode="'single'" :formats="formats" v-model="selectedDate"></v-date-picker>
+        期限：<v-date-picker :mode="'single'" :formats="formats" v-model="selectedDate"></v-date-picker>
         <button @click.prevent="enter" class="btn_add">追加</button>
       </form>
       <transition-group tag="ul" name="fade">
         <li v-for="list in lists" :class="list.class" :key="list.id">
-          <span v-show="list.show">{{
-              list.text
-            }}</span>
-          <div class="rest_date">
+          <span class="list_text">{{list.text}}</span>
+          <!-- <div class="rest_date">
             残り{{ (list.date <= 0) ? 0 : list.date }}日
-          </div>
-          
-          <button type="text" value="">編集</button>
+          </div> -->
+          <button type="text" value="" @click="showModal(list)">編集</button>
+          <span class="list_status">{{list.select}}</span>
+          <span>{{list.date|customformat}}</span>
           <button class="btn_remove" @click="listRemove(list)">削除</button>
-          <div id="list-modal">
-            <h2>編集</h2>
-            <div>
-              <input type="text" :model="list.text" :value="list.text">
-            </div>
-            <select name="" id="" v-model="list.select" @change="changeClass(list)">
-                <option value="未着手">未着手</option>
-                <option value="作業中">作業中</option>
-                <option value="完了">完了</option>
-              </select>
-               <div>
-                <v-date-picker :mode="'single'" :formats="formats" ></v-date-picker>
-              </div>
+          <div id="list-modal" v-if="list.show" @click.self="showModal(list)">
+            <dl class="list-modal__box">
+              <h2>編集</h2>
+
+              <dt>内容</dt>
+              <dd><input type="text" v-model="list.text" /></dd>
+              <dt>進捗</dt>
+              <dd><select name="" id="" v-model="list.select" @change="changeClass(list)">
+                  <option value="未着手">未着手</option>
+                  <option value="作業中">作業中</option>
+                  <option value="完了">完了</option>
+                </select></dd>
+              <dt>期限</dt>
+              <dd>
+                <div>
+                  <v-date-picker :mode="'single'" :formats="formats" v-model="list.date"></v-date-picker>
+                </div>
+              </dd>
+
+              <button @click="showModal(list)" class="">完了</button>
+            </dl>
           </div>
         </li>
       </transition-group>
     </div>
-    <pre>{{$data}}</pre>
   </div>
   <style scoped="card">
     body {
@@ -70,7 +76,9 @@
     }
 
     li,
-    ul {
+    ul,
+    dt,
+    dd {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -108,6 +116,7 @@
       font-size: 16px;
       border: none;
       padding: 3px 15px;
+      margin-left: 10px;
     }
 
     button {
@@ -117,7 +126,7 @@
     }
 
     .add_todo {
-      width: 65%;
+      width: 60%;
       padding: 5px;
       border: 1px solid #777;
       border: none;
@@ -141,8 +150,12 @@
       background: rgb(238, 255, 236);
     }
 
-    li.comp span {
+    li.comp .list_text {
       text-decoration: line-through;
+    }
+
+    li.comp .list_status {
+      background: ;
     }
 
     li.over {
@@ -150,9 +163,13 @@
       color: red;
     }
 
-    li span {
-      width: 420px;
+    .list_text {
+      width: 350px;
       display: inline-block;
+    }
+
+    .list_status {
+      border-radius: 50px;
     }
 
     li input {
@@ -191,8 +208,50 @@
       transform: translateX(-1000px);
     }
   </style>
+  <style>
+    #list-modal {
+      position: absolute;
+      width: 100%;
+      background: rgba(0, 0, 0, .5);
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 60px;
+      box-sizing: border-box;
+    }
+
+    .list-modal__box {
+      width: 500px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 5px;
+    }
+
+    .list-modal__box h2 {
+      margin: 0 0 20px;
+    }
+    .list-modal__box dt{
+      font-size: 1.1em;
+    }
+    .list-modal__box dd{
+      margin-bottom: 10px;
+    }
+    .list-modal__box button{
+      width: 300px;
+      background: rgb(62, 119, 4);
+      color: #fff;
+      font-size: 1.2em;
+      padding: 10px 0;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/v-calendar"></script>
+  <script src="https://momentjs.com/downloads/moment.js"></script>
   <script src="app.js"></script>
 </body>
 

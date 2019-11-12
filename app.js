@@ -22,19 +22,12 @@ new Vue({
       this.lists.push({
         id: this.uid++,
         text: text,
-        show: true,
         select: "未着手",
         class: "",
-        date:this.addDate,
+        date:this.selectedDate,
+        show:false,
       })
       this.input = '';
-        for (var i = 0; i < this.lists.length; i++ ){
-          if(this.lists[i].date < 0){
-            this.lists[i].class = "over";
-          }else if(this.lists[i].date == 0){
-            this.lists[i].date = "今";
-          }
-        }
     },
     changeClass(list) {
       if (list.select == "完了") {
@@ -48,6 +41,9 @@ new Vue({
     listRemove(list) {
       let index = this.lists.indexOf(list)
       this.lists.splice(index, 1)
+    },
+    showModal(list){
+      return list.show = !list.show;
     }
   },
   computed:{
@@ -57,6 +53,10 @@ new Vue({
       let compDate = (date2 - date1) / 86400000;
       return Math.ceil(compDate);
     },
-    
+  },
+  filters:{
+    customformat: function(value){
+      return moment(value).format('YYYY-MM-DD');
+    }
   }
 });
