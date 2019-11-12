@@ -1,187 +1,199 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>TODO</title>
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/v-calendar/lib/v-calendar.min.css"
-    />
-  </head>
 
-  <body >
-    <div id="app" v-cloak>
-      <div class="card">
-        <form id="add_form">
-          <input
-            type="text"
-            v-model="input"
-            class="add_todo"
-            placeholder="タスクを入力してください"
-          />
-          <v-date-picker
-            :mode="'single'"
-            :formats="formats"
-            v-model="selectedDate"
-          ></v-date-picker>
-          <button @click.prevent="enter" class="btn_add">追加</button>
-        </form>
-        <transition-group tag="ul" name="fade">
-          <li v-for="list in lists" :class="list.class" :key="list.id">
-            <span v-show="list.show" @click="list.show = !list.show">{{
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>TODO</title>
+  <link rel="stylesheet" href="https://unpkg.com/v-calendar/lib/v-calendar.min.css" />
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="card">
+      <form id="add_form">
+        <input type="text" v-model="input" class="add_todo" placeholder="タスクを入力してください" />
+        <v-date-picker :mode="'single'" :formats="formats" v-model="selectedDate"></v-date-picker>
+        <button @click.prevent="enter" class="btn_add">追加</button>
+      </form>
+      <transition-group tag="ul" name="fade">
+        <li v-for="list in lists" :class="list.class" :key="list.id">
+          <span v-show="list.show">{{
               list.text
             }}</span>
-            <input
-              type="text"
-              ref="target"
-              v-show="!list.show"
-              @keydown.enter="list.show = !list.show"
-              v-model="list.text"
-            />
-            <div class="rest_date">
-              残り{{ (list.date <= 0) ? 0 : list.date }}日
-            </div>
-            <select
-              name=""
-              id=""
-              v-model="list.select"
-              @change="changeClass(list)"
-            >
-              <option value="未着手">未着手</option>
-              <option value="作業中">作業中</option>
-              <option value="完了">完了</option>
-            </select>
-            <button class="btn_remove" @click="listRemove(list)">削除</button>
-          </li>
-        </transition-group>
-      </div>
-    </div>
-    <style>
-      body {
-        background: #eeeeee;
-        padding: 40px;
-      }
-    
-      #app {
-        font-size: 16px;
-        animation: clock-in .5s;
-      }
-      #app[v-cloak]{
-          opacity: 0;
-      }
-      @keyframes clock-in{
-        0%{opacity: 0;}
-      }
-      li,
-      ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      #add_form {
-        margin-bottom: 20px;
-        padding: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 3px 0px rgba(0,0,0,0.1);
-      }
-
-      #add_form input {
-        font-size: 18px;
-      }
-      input:focus{
-        outline: none;
-      }
-      .card {
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-        border-radius: 5px;
-        width: 600px;
-        box-sizing: border-box;
-        background: #fff;
-      }
-      .btn_add{
-          background: rgb(29, 218, 155);
-          color: #fff;
-          font-size: 16px;
-          border: none;
-          padding: 3px 15px;
-      }
-      button{
-          border-radius: 5px;
-          padding: 3px 10px;
+          <div class="rest_date">
+            残り{{ (list.date <= 0) ? 0 : list.date }}日
+          </div>
           
-      }
-      .add_todo {
-        width: 70%;
-        padding: 5px;
-        border: 1px solid #777;
-        border: none;
-      }
-      ul{
-        padding: 0 20px 20px;
-        overflow: hidden;
-      }
-      li {
-        padding: 10px 5px 10px 15px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-        display: flex;
-        justify-content: space-around;
-        box-shadow: 0 1px 6px 0px rgba(0,0,0,0.2);
-      }
+          <button type="text" value="">編集</button>
+          <button class="btn_remove" @click="listRemove(list)">削除</button>
+          <div id="list-modal">
+            <h2>編集</h2>
+            <div>
+              <input type="text" :model="list.text" :value="list.text">
+            </div>
+            <select name="" id="" v-model="list.select" @change="changeClass(list)">
+                <option value="未着手">未着手</option>
+                <option value="作業中">作業中</option>
+                <option value="完了">完了</option>
+              </select>
+               <div>
+                <v-date-picker :mode="'single'" :formats="formats" ></v-date-picker>
+              </div>
+          </div>
+        </li>
+      </transition-group>
+    </div>
+    <pre>{{$data}}</pre>
+  </div>
+  <style scoped="card">
+    body {
+      background: #eeeeee;
+      padding: 40px;
+      font-family: sans-serif;
+    }
 
-      li.comp {
-        background: rgb(238, 255, 236);
-      }
-      li.comp span{
-        text-decoration: line-through;
-      }
-      li.over {
-        background: rgb(255, 226, 218);
-        color: red;
-      }
+    #app {
+      font-size: 16px;
+      animation: clock-in .5s;
+    }
 
-      li span {
-        width: 300px;
-        display: inline-block;
-      }
+    #app[v-cloak] {
+      opacity: 0;
+    }
 
-      li input {
-        width: 290px;
-        font-size: 16px;
+    @keyframes clock-in {
+      0% {
+        opacity: 0;
       }
+    }
 
-      li select {
-        font-size: 14px;
-      }
+    li,
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
 
-      li .btn_remove {
-        border-radius: 5px;
-        background: #f1f1f1;
-        font-size: 14px;
-      }
-      input[placeholder="MM-DD"] {
-        min-width: 60px !important;
-        width: 50px;
-        display: block;
-      }
-      .fade-enter-active,
-      .fade-leave-active {
-        transition: 0.3s;
-        transform: translateX(0);
-      }
+    #add_form {
+      margin-bottom: 20px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.1);
+    }
 
-      .fade-enter,
-      .fade-leave-to {
-        transform: translateX(-1000px);
-      }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/v-calendar"></script>
-    <script src="app.js"></script>
-  </body>
+    #add_form input {
+      font-size: 18px;
+    }
+
+    input:focus {
+      outline: none;
+    }
+
+    .card {
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+      width: 700px;
+      box-sizing: border-box;
+      background: #fff;
+      margin: 0 auto;
+    }
+
+    .btn_add {
+      background: rgb(29, 218, 155);
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      padding: 3px 15px;
+    }
+
+    button {
+      border-radius: 5px;
+      padding: 3px 10px;
+
+    }
+
+    .add_todo {
+      width: 65%;
+      padding: 5px;
+      border: 1px solid #777;
+      border: none;
+    }
+
+    ul {
+      padding: 0 20px 20px;
+
+    }
+
+    li {
+      padding: 10px 5px 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 1px 6px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    li.comp {
+      background: rgb(238, 255, 236);
+    }
+
+    li.comp span {
+      text-decoration: line-through;
+    }
+
+    li.over {
+      background: rgb(255, 226, 218);
+      color: red;
+    }
+
+    li span {
+      width: 420px;
+      display: inline-block;
+    }
+
+    li input {
+      width: 290px;
+      font-size: 16px;
+    }
+
+    li select {
+      font-size: 14px;
+    }
+
+    li .btn_remove {
+      border-radius: 5px;
+      background: #f1f1f1;
+      font-size: 14px;
+    }
+
+    input[placeholder="YYYY-MM-DD"] {
+      min-width: 120px !important;
+      width: 120px;
+      display: block;
+      border-radius: 5px;
+      border: 1px solid #cdcdcd;
+      padding: 3px 5px;
+      color: #666;
+    }
+
+    .fade-enter-active,
+    .fade-leave-active {
+      transition: 0.3s;
+      transform: translateX(0);
+    }
+
+    .fade-enter,
+    .fade-leave-to {
+      transform: translateX(-1000px);
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/v-calendar"></script>
+  <script src="app.js"></script>
+</body>
+
 </html>

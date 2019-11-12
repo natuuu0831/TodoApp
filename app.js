@@ -1,3 +1,6 @@
+Vue.component('modal',{
+
+})
 new Vue({
   el: '#app',
   data: {
@@ -6,7 +9,7 @@ new Vue({
     uid: 0,
     mode: 'single',
     formats: {
-      input: ['MM-DD'],
+      input: ['YYYY-MM-DD'],
     },
     selectedDate: new Date(),
   },
@@ -32,8 +35,6 @@ new Vue({
             this.lists[i].date = "今";
           }
         }
-      
-      
     },
     changeClass(list) {
       if (list.select == "完了") {
