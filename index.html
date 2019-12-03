@@ -12,21 +12,42 @@
 <body>
   <div id="app" v-cloak>
     <div class="card">
-      <form id="add_form">
+      <form id="addForm">
         <input type="text" v-model="input" class="add_todo" placeholder="タスクを入力してください" />
         期限：<v-date-picker :mode="'single'" :formats="formats" v-model="selectedDate"></v-date-picker>
         <button @click.prevent="enter" class="btn_add">追加</button>
       </form>
-      <transition-group tag="ul" name="fade">
-        <li v-for="list in lists" :class="list.class" :key="list.id">
-          <span class="list_text">{{list.text}}</span>
-          <!-- <div class="rest_date">
+
+      <div class="filter_wrap">
+        <ul class="filter_list" id="filterProgress">
+          進捗：
+          <li v-for="filterItem in filterProgress" :value="filterItem.value" @click="filterSelect(filterItem)"
+            :class="{filterButton:filterItem.done}">
+            {{filterItem.name}}
+          </li>
+        </ul>
+        <ul class="filter_list" id="filterLimit">
+          期限：
+          <li v-for="filterItem in filterLimit" :value="filterItem.value" @click="filterSelect(filterItem)">
+            {{filterItem.name}}</li>
+        </ul>
+        <span class="list-count">全 {{listCount}} / {{listFilting}}件</span>
+      </div>
+
+      <transition-group tag="ul" name="fade" id="taskList">
+        <li v-for="list in listFilter" :class="list.select" :key="list.id">
+          <div class="taskList__wrap" @click="showModal(list)">
+            <span class="list_text">{{list.text}}</span>
+            <!-- <div class="rest_date">
             残り{{ (list.date <= 0) ? 0 : list.date }}日
           </div> -->
-          <button type="text" value="" @click="showModal(list)">編集</button>
-          <span class="list_status">{{list.select}}</span>
-          <span>{{list.date|customformat}}</span>
-          <button class="btn_remove" @click="listRemove(list)">削除</button>
+            <span class="list_status">{{list.select | changeselect}}</span>
+            <span>{{list.date|customformat}}</span>
+            <span>残り{{list.limit}}日</span>
+            <button class="btn_remove" @click="listRemove(list)">削除</button>
+          </div>
+
+          <!----modal----->
           <div id="list-modal" v-if="list.show" @click.self="showModal(list)">
             <dl class="list-modal__box">
               <h2>編集</h2>
@@ -34,21 +55,21 @@
               <dt>内容</dt>
               <dd><input type="text" v-model="list.text" /></dd>
               <dt>進捗</dt>
-              <dd><select name="" id="" v-model="list.select" @change="changeClass(list)">
-                  <option value="未着手">未着手</option>
-                  <option value="作業中">作業中</option>
-                  <option value="完了">完了</option>
-                </select></dd>
-              <dt>期限</dt>
               <dd>
-                <div>
-                  <v-date-picker :mode="'single'" :formats="formats" v-model="list.date"></v-date-picker>
-                </div>
+                <select v-model="list.select" ref="first_child">
+                  <option value="yet">未着手</option>
+                  <option value="work">作業中</option>
+                  <option value="comp">完了</option>
+                </select>
               </dd>
-
+              <dt>期限</dt>
+              <dd class="list-modal__box__date">
+                <v-date-picker :mode="'single'" :formats="formats" v-model="list.date"></v-date-picker>
+              </dd>
               <button @click="showModal(list)" class="">完了</button>
             </dl>
           </div>
+          <!----modal----->
         </li>
       </transition-group>
     </div>
@@ -57,7 +78,7 @@
     body {
       background: #eeeeee;
       padding: 40px;
-      font-family: sans-serif;
+      font-family: "游ゴシック体", YuGothic, "游ゴシック Medium", "Yu Gothic Medium", "游ゴシック", "Yu Gothic", "ヒラギノ角ゴ Pro", "Hiragino Kaku Gothic Pro", "メイリオ", Meiryo, sans-serif;
     }
 
     #app {
@@ -84,7 +105,7 @@
       margin: 0;
     }
 
-    #add_form {
+    #addForm {
       margin-bottom: 20px;
       padding: 20px;
       display: flex;
@@ -93,7 +114,7 @@
       box-shadow: 0 2px 3px 0px rgba(0, 0, 0, 0.1);
     }
 
-    #add_form input {
+    #addForm input {
       font-size: 18px;
     }
 
@@ -104,7 +125,7 @@
     .card {
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       border-radius: 5px;
-      width: 700px;
+      width: 800px;
       box-sizing: border-box;
       background: #fff;
       margin: 0 auto;
@@ -122,7 +143,7 @@
     button {
       border-radius: 5px;
       padding: 3px 10px;
-
+      cursor: pointer;
     }
 
     .add_todo {
@@ -132,30 +153,28 @@
       border: none;
     }
 
-    ul {
-      padding: 0 20px 20px;
+    #taskList {
+      padding: 5px 20px 20px;
       overflow: hidden;
     }
 
-    li {
+    #taskList .taskList__wrap {
       padding: 10px 5px 10px 15px;
       margin-bottom: 10px;
       border-radius: 5px;
       display: flex;
       justify-content: space-around;
-      box-shadow: 0 1px 6px 0px rgba(0, 0, 0, 0.2);
+      align-items: center;
+      box-shadow: 0 1px 3px 0px rgba(0, 0, 0, 0.4);
+      cursor: pointer;
+    }
+
+    #taskList .taskList__wrap:hover {
+      background: #fffdf6;
     }
 
     li.comp {
       background: rgb(238, 255, 236);
-    }
-
-    li.comp .list_text {
-      text-decoration: line-through;
-    }
-
-    li.comp .list_status {
-      background: ;
     }
 
     li.over {
@@ -166,16 +185,47 @@
     .list_text {
       width: 350px;
       display: inline-block;
+      font-size: 1.1rem;
     }
 
+    .comp .list_text {
+      text-decoration: line-through;
+    }
+
+
     .list_status {
+      display: inline-block;
+      width: 45px;
+      padding: 1px 8px;
+      font-size: .9rem;
+      color: #fff;
+      text-align: center;
       border-radius: 50px;
     }
+
+    .yet .list_status {
+      background: #ff7c8e;
+    }
+
+    .work .list_status {
+      background: #acbb23;
+    }
+
+    .comp .list_status {
+      background: #23bb8a;
+    }
+
+
+
+
+
 
     li input {
       width: 290px;
       font-size: 16px;
+      padding: 5px;
     }
+
 
     li select {
       font-size: 14px;
@@ -233,20 +283,59 @@
     .list-modal__box h2 {
       margin: 0 0 20px;
     }
-    .list-modal__box dt{
+
+    .list-modal__box dt {
       font-size: 1.1em;
     }
-    .list-modal__box dd{
+
+    .list-modal__box dd {
       margin-bottom: 10px;
     }
-    .list-modal__box button{
+
+    .list-modal__box button {
       width: 300px;
-      background: rgb(62, 119, 4);
+      background: rgb(83, 202, 142);
       color: #fff;
       font-size: 1.2em;
       padding: 10px 0;
       cursor: pointer;
       margin-top: 20px;
+    }
+
+    .list-modal__box__date {
+      width: 135px;
+    }
+  </style>
+  <style>
+    .filter_wrap {
+      display: flex;
+    }
+
+    .filter_list {
+      display: flex;
+      padding: 0 20px 20px;
+    }
+
+    .filter_list li {
+      border: 1px solid #999;
+      border-radius: 20px;
+      padding: 2px 15px;
+      font-size: .9rem;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+
+    .filter_list li:hover {
+      background: rgb(241, 241, 241);
+    }
+
+    .list-count {
+      margin-left: 130px;
+    }
+
+    .filterButton {
+      background: #444 !important;
+      color: #fff !important;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
