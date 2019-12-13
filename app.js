@@ -2,7 +2,7 @@ let vm = new Vue({
   el: "#app",
   data: {
     input: "",
-    filterSelected: null,
+    filterSelected: undefined,
     filterProgress: [
       { name: "未着手", value: "yet", done: false },
       { name: "作業中", value: "work", done: false },
@@ -29,26 +29,32 @@ let vm = new Vue({
         id: this.uid++,
         text: text,
         select: "yet",
+        _select:"yet",
         date: this.selectedDate,
         show: false,
         limit: this.diffDate(this.selectedDate)
       });
       this.input = "";
-      
     },
     listRemove(list) {
       let index = this.lists.indexOf(list);
       this.lists.splice(index, 1);
     },
     showModal(list) {
+      if(list.show == true){// 閉じる時
+        list.select = list._select;
+        list.limit = this.diffDate(list.date);
+        list.limit < 0 ? list.limit = 0 : list.limit;
+      } 
       list.show = !list.show;
-  
     },
+    
     diffDate(date2) {
       let date1 = new Date();
       let compDate = (date2 - date1) / 86400000;
       return Math.ceil(compDate);
     },
+   
     filterSelect(filterItem) {
       let selectValue = filterItem.value;
       if (this.filterSelected !== selectValue) {
@@ -56,10 +62,8 @@ let vm = new Vue({
       } else {
         this.filterSelected = null;
       }
-
       let count = 0;
       let f = this.filterProgress;
-
       for (let i in f) {
         f[i].done == false&&count++;
         if (count !== f.length) {

@@ -33,17 +33,18 @@
         </ul>
         <span class="list-count">全 {{listCount}} / {{listFilting}}件</span>
       </div>
+      <transition name="fade">
+        <div class="no-task" v-show="listFilting==0">タスクはありません</div>
+      </transition>
 
-      <transition-group tag="ul" name="fade" id="taskList">
+      <!-- lists -->
+      <transition-group tag="ul" name="slide" id="taskList">
         <li v-for="list in listFilter" :class="list.select" :key="list.id">
           <div class="taskList__wrap" @click="showModal(list)">
             <span class="list_text">{{list.text}}</span>
-            <!-- <div class="rest_date">
-            残り{{ (list.date <= 0) ? 0 : list.date }}日
-          </div> -->
             <span class="list_status">{{list.select | changeselect}}</span>
             <span>{{list.date|customformat}}</span>
-            <span>残り{{list.limit}}日</span>
+            <span :class="list.limit == 0 ? {limit:true}:null">残り<span class="big">{{list.limit}}</span>日</span>
             <button class="btn_remove" @click="listRemove(list)">削除</button>
           </div>
 
@@ -56,7 +57,7 @@
               <dd><input type="text" v-model="list.text" /></dd>
               <dt>進捗</dt>
               <dd>
-                <select v-model="list.select" ref="first_child">
+                <select v-model="list._select" ref="first_child">
                   <option value="yet">未着手</option>
                   <option value="work">作業中</option>
                   <option value="comp">完了</option>
@@ -72,6 +73,7 @@
           <!----modal----->
         </li>
       </transition-group>
+      <!-- lists -->
     </div>
   </div>
   <style scoped="card">
@@ -129,6 +131,7 @@
       box-sizing: border-box;
       background: #fff;
       margin: 0 auto;
+      position: relative;
     }
 
     .btn_add {
@@ -154,7 +157,7 @@
     }
 
     #taskList {
-      padding: 5px 20px 20px;
+      padding: 5px 20px 30px;
       overflow: hidden;
     }
 
@@ -179,6 +182,10 @@
 
     li.over {
       background: rgb(255, 226, 218);
+      color: red;
+    }
+
+    li span.limit {
       color: red;
     }
 
@@ -247,6 +254,26 @@
       color: #666;
     }
 
+    .no-task {
+      text-align: center;
+      transition: 1s;
+      transition-delay: 1s;
+      position: absolute;
+      width: 100%;
+      top: 140px;
+    }
+
+    .slide-enter-active,
+    .slide-leave-active {
+      transition: 0.3s;
+      transform: translateX(0);
+    }
+
+    .slide-enter,
+    .slide-leave-to {
+      transform: translateX(-1000px);
+    }
+
     .fade-enter-active,
     .fade-leave-active {
       transition: 0.3s;
@@ -255,12 +282,14 @@
 
     .fade-enter,
     .fade-leave-to {
-      transform: translateX(-1000px);
+      transform: translateX(1000px);
+
+
     }
   </style>
   <style>
     #list-modal {
-      position: absolute;
+      position: fixed;
       width: 100%;
       background: rgba(0, 0, 0, .5);
       height: 100%;
@@ -313,7 +342,7 @@
 
     .filter_list {
       display: flex;
-      padding: 0 20px 20px;
+      padding: 0 20px 30px;
     }
 
     .filter_list li {
