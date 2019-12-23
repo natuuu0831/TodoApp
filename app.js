@@ -62,13 +62,11 @@ let vm = new Vue({
     },
 
     filterItemSelect(progressList) {
-      let sFI = this.selectedFilteringItem;
       let selectValue = progressList.value;
-
-      if (sFI !== selectValue) {
-        sFI = selectValue;
+      if (this.selectedFilteringItem !== selectValue) {
+        this.selectedFilteringItem = selectValue;
       } else {
-        sFI = null;
+        this.selectedFilteringItem = null;
       }
       let noSelectedFilterItem = 0;
       let l = this.progressLists;
@@ -79,7 +77,7 @@ let vm = new Vue({
         if (noSelectedFilterItem !== l.length) {
           l[i].done = false;
           progressList.done = true;
-          if (sFI == null) {
+          if (this.selectedFilteringItem == null) {
             progressList.done = false;
           }
         }
