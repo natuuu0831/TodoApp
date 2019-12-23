@@ -15,41 +15,37 @@
       <form id="addForm">
         <input type="text" v-model="input" class="add_todo" placeholder="タスクを入力してください" />
         期限：<v-date-picker :mode="'single'" :formats="formats" v-model="selectedDate"></v-date-picker>
-        <button @click.prevent="enter" class="btn_add">追加</button>
+        <button @click.prevent="addTask" class="btn_add">追加</button>
       </form>
 
       <div class="filter_wrap">
-        <ul class="filter_list" id="filterProgress">
+        <ul class="filter_lists" id="narrowProgress">
           進捗：
-          <li v-for="filterItem in filterProgress" :value="filterItem.value" @click="filterSelect(filterItem)"
-            :class="{filterButton:filterItem.done}">
-            {{filterItem.name}}
+          <li v-for="progressList in progressLists" :value="progressList.value" @click="filterItemSelect(progressList)"
+            :class="{filteringButton:progressList.done}">
+            {{progressList.name}}
           </li>
         </ul>
-        <ul class="filter_list" id="filterLimit">
-          期限：
-          <li v-for="filterItem in filterLimit" :value="filterItem.value" @click="filterSelect(filterItem)">
-            {{filterItem.name}}</li>
-        </ul>
-        <span class="list-count">全 {{listCount}} / {{listFilting}}件</span>
+        <button class="filter_limit_botton" :class="{limitOn:filteringLimit}" @click="filterLimit">期限間近</button>
+        <span class="list-count">全 {{listCount}} / {{ｆilteredlistCount}}件</span>
       </div>
       <transition name="fade">
-        <div class="no-task" v-show="listFilting==0">タスクはありません</div>
+        <div class="no-task" v-show="ｆilteredlistCount==0">{{selectedFilteringItem | changeProgressLang}}タスクはありません</div>
       </transition>
 
       <!-- lists -->
       <transition-group tag="ul" name="slide" id="taskList">
-        <li v-for="list in listFilter" :class="list.select" :key="list.id">
-          <div class="taskList__wrap" @click="showModal(list)">
+        <li v-for="list in ｆilteredlist" :class="list.progress" :key="list.id">
+          <div class="taskList__wrap" @click="ToggleModal(list)">
             <span class="list_text">{{list.text}}</span>
-            <span class="list_status">{{list.select | changeselect}}</span>
+            <span class="list_status">{{list.progress | changeProgressLang}}</span>
             <span>{{list.date|customformat}}</span>
             <span :class="list.limit == 0 ? {limit:true}:null">残り<span class="big">{{list.limit}}</span>日</span>
-            <button class="btn_remove" @click="listRemove(list)">削除</button>
+            <button class="btn_remove" @click.stop="listRemove(list)">削除</button>
           </div>
 
           <!----modal----->
-          <div id="list-modal" v-if="list.show" @click.self="showModal(list)">
+          <div id="list-modal" v-if="list.show" @click.self="ToggleModal(list)">
             <dl class="list-modal__box">
               <h2>編集</h2>
 
@@ -57,7 +53,7 @@
               <dd><input type="text" v-model="list.text" /></dd>
               <dt>進捗</dt>
               <dd>
-                <select v-model="list._select" ref="first_child">
+                <select v-model="list._progress">
                   <option value="yet">未着手</option>
                   <option value="work">作業中</option>
                   <option value="comp">完了</option>
@@ -67,7 +63,7 @@
               <dd class="list-modal__box__date">
                 <v-date-picker :mode="'single'" :formats="formats" v-model="list.date"></v-date-picker>
               </dd>
-              <button @click="showModal(list)" class="">完了</button>
+              <button @click="ToggleModal(list)" class="">完了</button>
             </dl>
           </div>
           <!----modal----->
@@ -147,6 +143,7 @@
       border-radius: 5px;
       padding: 3px 10px;
       cursor: pointer;
+      outline: none;
     }
 
     .add_todo {
@@ -198,8 +195,6 @@
     .comp .list_text {
       text-decoration: line-through;
     }
-
-
     .list_status {
       display: inline-block;
       width: 45px;
@@ -221,29 +216,19 @@
     .comp .list_status {
       background: #23bb8a;
     }
-
-
-
-
-
-
     li input {
       width: 290px;
       font-size: 16px;
       padding: 5px;
     }
-
-
     li select {
       font-size: 14px;
     }
-
     li .btn_remove {
       border-radius: 5px;
       background: #f1f1f1;
       font-size: 14px;
     }
-
     input[placeholder="YYYY-MM-DD"] {
       min-width: 120px !important;
       width: 120px;
@@ -253,7 +238,6 @@
       padding: 3px 5px;
       color: #666;
     }
-
     .no-task {
       text-align: center;
       transition: 1s;
@@ -262,29 +246,23 @@
       width: 100%;
       top: 140px;
     }
-
     .slide-enter-active,
     .slide-leave-active {
       transition: 0.3s;
       transform: translateX(0);
     }
-
     .slide-enter,
     .slide-leave-to {
       transform: translateX(-1000px);
     }
-
     .fade-enter-active,
     .fade-leave-active {
       transition: 0.3s;
       transform: translateX(0);
     }
-
     .fade-enter,
     .fade-leave-to {
       transform: translateX(1000px);
-
-
     }
   </style>
   <style>
@@ -338,14 +316,16 @@
   <style>
     .filter_wrap {
       display: flex;
+      align-items: center;
+      margin: 0 20px 30px;
     }
 
-    .filter_list {
+    .filter_lists {
       display: flex;
-      padding: 0 20px 30px;
+      margin-right: 30px;
     }
 
-    .filter_list li {
+    .filter_lists li {
       border: 1px solid #999;
       border-radius: 20px;
       padding: 2px 15px;
@@ -354,15 +334,26 @@
       cursor: pointer;
     }
 
-    .filter_list li:hover {
+    .filter_lists li:hover {
       background: rgb(241, 241, 241);
     }
 
-    .list-count {
-      margin-left: 130px;
+    .filter_limit_botton {
+      color: red;
+      border: 1px solid;
+      font-size: 0.9em;
     }
 
-    .filterButton {
+    .filter_limit_botton.limitOn {
+      background: red;
+      color: #fff;
+    }
+
+    .list-count {
+      margin-left: 280px;
+    }
+
+    .filteringButton {
       background: #444 !important;
       color: #fff !important;
     }
