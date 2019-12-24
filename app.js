@@ -43,7 +43,6 @@ let vm = new Vue({
         list.show = list.show;
         return false;
       }
-      this.taskLists.splice(index, 1);
     },
     ToggleModal(list) {
       if (list.show == true) {
