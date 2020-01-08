@@ -46,7 +46,6 @@ let vm = new Vue({
     },
     ToggleModal(list) {
       if (list.show == true) {
-        // 閉じる時
         list.progress = list._progress;
         list.limit = this.diffDate(list.date);
         list.limit < 0 ? (list.limit = 0) : list.limit;
@@ -93,14 +92,15 @@ let vm = new Vue({
     ｆilteredlist() {
       let sFI = this.selectedFilteringItem;
       let fL = this.filteringLimit;
+      let limitDays = 3;
       return this.taskLists.filter(function(el) {
         if (sFI && !fL) {
           return el.progress == sFI;
         } else if (fL) {
           if (sFI) {
-            return el.progress == sFI && el.limit <= 3;
+            return el.progress == sFI && el.limit <= limitDays;
           } else if (!sFI) {
-            return el.limit <= 3;
+            return el.limit <= limitDays;
           }
         } else {
           return this.taskLists;
