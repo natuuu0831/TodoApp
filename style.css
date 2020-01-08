@@ -41,7 +41,13 @@
     #addForm input {
       font-size: 18px;
     }
-
+    #addForm > span{
+      width: 120px;
+      margin-right: 20px;
+    }
+    #addForm > span input{
+      font-size: 1em;
+    }
     input:focus {
       outline: none;
     }

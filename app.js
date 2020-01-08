@@ -112,7 +112,7 @@ let vm = new Vue({
     }
   },
   filters: {
-    customformat: function(value) {
+    customformat(value) {
       return moment(value).format("YYYY/MM/DD");
     },
     changeProgressLang(value) {
@@ -125,6 +125,14 @@ let vm = new Vue({
           return "未着手";
         default:
           break;
+      }
+    },   
+    limitOver(value) {
+    // 残り日付が0未満を0に直す
+      if(Number(value) < 0){
+        return "0";
+      }else{
+        return value;
       }
     }
   }

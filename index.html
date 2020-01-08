@@ -7,7 +7,6 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>TODO</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://unpkg.com/v-calendar/lib/v-calendar.min.css" />
 </head>
 
 <body>
@@ -41,7 +40,7 @@
             <span class="list_text">{{list.text}}</span>
             <span class="list_status">{{list.progress | changeProgressLang}}</span>
             <span>{{list.date|customformat}}</span>
-            <span :class="list.limit == 0 ? {limit:true}:null">残り<span class="big">{{list.limit}}</span>日</span>
+            <span :class="list.limit <= 0 ? {limit:true}:null">残り<span class="big">{{list.limit | limitOver}}</span>日</span>
             <button class="btn_remove" @click.stop="listRemove(list)">削除</button>
           </div>
 
@@ -73,7 +72,7 @@
       <!-- lists -->
     </div>
   </div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="https://unpkg.com/v-calendar"></script>
   <script src="https://momentjs.com/downloads/moment.js"></script>
